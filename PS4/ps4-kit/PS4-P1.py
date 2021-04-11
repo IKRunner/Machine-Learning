@@ -3,6 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import utils
+from numpy import genfromtxt
+
 
 
 def plot_reconstruction(images, title, filename):
@@ -46,5 +48,14 @@ def plot_reconstruction(images, title, filename):
     plt.savefig(filename)
 
 
-## Your code starts here
-#test
+################################################
+# Problem 1a(i)
+################################################
+print('-----------------------------------------------------------------------')
+print('Load.........)')
+
+# t = utils.load_all_train_test_data("P1/X_train.csv")
+my_data = genfromtxt('P1/X_train.csv', delimiter=',')
+last_example = np.reshape(my_data[-1, :], (28, 28))
+plt.imshow(last_example, cmap="gray")
+p=1
