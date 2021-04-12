@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import utils
 from numpy import genfromtxt
-
+from scipy import linalg
 
 
 def plot_reconstruction(images, title, filename):
@@ -66,9 +66,9 @@ plt.savefig('Plots/Fig_1a_last_example.png')
 # Problem 1b
 ################################################
 print('-----------------------------------------------------------------------')
-print('Run PCA on data...')
+print('Run PCA on data using SVD...')
 
-# Mean center data
+# Mean-center data
 data_mean_centered = data - np.mean(data, axis=0)
 
 # Generate covariance matrix
@@ -76,7 +76,7 @@ m = data_mean_centered.shape[0]
 cov_matrix = (1 / (m - 1)) * (data_mean_centered.T @ data_mean_centered)
 
 # Compute Eigenvectors and Eigenvalues
-eig_values, eig_vectors = np.linalg.eigh(cov_matrix)
+eig_values, eig_vectors = np.linalg.eig(cov_matrix)
 
 # Sort Eigenvalues and corresponding Eigenvectors in descending order
 num_components = 1
@@ -84,6 +84,11 @@ sorted_idx = np.argsort(eig_values)[::-1]
 sorted_eigvalues = eig_values[sorted_idx]
 sorted_eigvectors = eig_vectors[:, sorted_idx]
 eigvector_subset = sorted_eigvectors[:, 0:num_components]
+
+# Compute SVD
+U, Sigma, Vt = np.linalg.svd(cov_matrix, full_matrices=False)
+data_mean = U @ np.diag(Sigma) @ Vt
+w,v = np.linalg.eig(data_mean.T @ data_mean)
 
 # Compute scores
 # scores = data_mean_centered @
