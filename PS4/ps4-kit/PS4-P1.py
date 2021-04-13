@@ -7,13 +7,6 @@ from numpy import genfromtxt
 from tabulate import tabulate
 
 
-from sklearn.datasets import load_digits
-from sklearn.decomposition import TruncatedSVD
-float_formatter = lambda x: "%.2f" % x
-np.set_printoptions(formatter={'float_kind':float_formatter})
-from sklearn.ensemble import RandomForestClassifier
-
-
 def plot_reconstruction(images, title, filename):
     '''
     Plots 10%, 20%, ..., 100% reconstructions of a 28x28 image
