@@ -75,11 +75,9 @@ plt.savefig('Plots/Fig_1a_last_example.png')
 print('-----------------------------------------------------------------------')
 print('Run PCA on data using SVD...')
 
-# Standardize data
-data_standardized = data - np.mean(data, axis=0)
-
-# Compute SVD
-U, Sigma, V = np.linalg.svd(data_standardized, full_matrices=False)
+# Mean-center data and compute SVD
+data_mean_centered = data - np.mean(data, axis=0)
+U, Sigma, V = np.linalg.svd(data_mean_centered, full_matrices=False)
 
 # Save image
 for i in [0, 1, 2]:
@@ -92,32 +90,29 @@ for i in [0, 1, 2]:
 print('-----------------------------------------------------------------------')
 print('Project data onto principle components...')
 
-# Mean-center data and compute scores
-data_mean_centered = data - np.mean(data, axis=0)
+# Compute scores
 num_components = 2
 scores = data_mean_centered @ V.T[:, :num_components]
 
 # Plot data
-fig, ax1 = plt.subplots()
-ax1.plot(scores[:, 0], scores[:, 1], 'o', markersize=2)
+fig, _ = plt.subplots()
+plt.plot(scores[:, 0], scores[:, 1], 'o', markersize=2)
 plt.title('Principle Components')
-ax1.set_xlabel('Principle Component 1')
-ax1.set_ylabel('Principle Component 2')
-plt.savefig('Plots/Fig_1c_top_2_principal_component.png')
-# plt.close(fig)
+plt.xlabel('Principle Component 1')
+plt.ylabel('Principle Component 2')
+fig.savefig('Plots/Fig_1c_top_2_principal_component.png')
 
 # 100 and 101th Principle Component
 num_components = [99, 100]
 scores = data_mean_centered @ V.T[:, 99:102]
 
 # Plot data
-fig, ax = plt.subplots()
-ax.plot(scores[:, 0], scores[:, 1], 'o', markersize=2)
+fig, _ = plt.subplots()
+plt.plot(scores[:, 0], scores[:, 1], 'o', markersize=2)
 plt.title('Principle Components')
-ax.set_xlabel('Principle Component 100')
-ax.set_ylabel('Principle Component 101')
-plt.savefig('Plots/Fig_1c_100_101_principal_component.png')
-# plt.close(fig)
+plt.xlabel('Principle Component 100')
+plt.ylabel('Principle Component 101')
+fig.savefig('Plots/Fig_1c_100_101_principal_component.png')
 
 
 ################################################
@@ -126,89 +121,61 @@ plt.savefig('Plots/Fig_1c_100_101_principal_component.png')
 print('-----------------------------------------------------------------------')
 print('Compute fractional reconstruction accuracy...')
 
-# Generate covariance matrix
-m = data_standardized.shape[0]
-cov_matrix = (1 / (m - 1)) * (data_standardized.T @ data_standardized)
-
-# Compute Eigenvectors and Eigenvalues
-eig_values, eig_vectors = np.linalg.eig(cov_matrix)
-sum_eigvals = np.sum(eig_values)
-
-# Sort Eigenvalues and corresponding Eigenvectors in descending order
-sorted_idx = np.argsort(eig_values)[::-1]
-sorted_eigvalues = eig_values[sorted_idx]
+# Compute Eigenvalues
+sum_eigvals = np.sum(np.square(Sigma))
 
 # Fractional reconstruction accuracy
-components = np.arange(data_standardized.shape[1])
-frac_acc = np.zeros((data_standardized.shape[1]), )
+components = np.arange(data_mean_centered.shape[1])
+frac_acc = np.zeros((data_mean_centered.shape[1]), )
 for i in components:
-    frac_acc[i] = np.sum(sorted_eigvalues[:i+1])
+    frac_acc[i] = np.sum(np.square(Sigma)[:i+1])
 
 # Plot
-fig, ax = plt.subplots()
-ax.plot(components, (frac_acc / sum_eigvals) * 100)
-ax.set_yticks((10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
-ax.set_xlim([0, 800])
-ax.set_ylim([0, 100])
+fig, _ = plt.subplots()
+plt.plot(components, (frac_acc / sum_eigvals) * 100)
+plt.yticks((10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+plt.xlim([0, 800])
+plt.ylim([0, 100])
 plt.title('Fractional Reconstruction Accuracy')
-ax.set_xlabel('No. Principle Components Used')
-ax.set_ylabel('Variance Explained (%)')
-plt.savefig('Plots/Fig_1d_fractional_reconstruction_accuracy.png')
+plt.xlabel('No. Principle Components Used')
+plt.ylabel('Variance Explained (%)')
+fig.savefig('Plots/Fig_1d_fractional_reconstruction_accuracy.png')
 
 # Generate table
 RC = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 rows, cols = (10, 2)
-data = [[0 for i in range(cols)] for j in range(rows)]
-data[0] = ['Reconstruction Accuracy', 'No. Principal Components Used']
+accuracy = [[0 for i in range(cols)] for j in range(rows)]
+accuracy[0] = ['Reconstruction Accuracy', 'No. Principal Components Used']
+components = np.zeros((len(RC), ), dtype=int)
 for i in range(len(RC)):
-    RC[i] * sum_eigvals
-    data[i+1] = [str(RC[i]), 1123]
-    # data = [['Reconstruction Accuracy','No. Principal Components Used '],
-    #     ["Himanshu",1123],
-    #     ["Rohit",1126],
-    #     ["Sha",111178]]
+    ele = np.where(np.logical_or((RC[i] * sum_eigvals) > frac_acc, (RC[i] * sum_eigvals) == frac_acc))
+    if ele[0].size == 0:
+        ele = 0
+        components[i] = ele + 1
+        accuracy[i+1] = [str(RC[i] * 100) + '%', components[i]]
+    else:
+        components[i] = ele[0][-1] + 1
+        accuracy[i+1] = [str(RC[i] * 100) + '%', components[i]]
 
-print(tabulate(data, headers='firstrow'))
+# Save table to text file
+open('Plots/Table_1d.txt', 'w').write(tabulate(accuracy))
 
-open('Plots/Table_1d.txt', 'w').write(tabulate(data))
+################################################
+# Problem 1e
+################################################
+print('-----------------------------------------------------------------------')
+print('Reconstruct sample 1000, 2000, 3000...')
 
-sorted_eigvectors = eig_vectors[:, sorted_idx]
-# eigvector_subset = sorted_eigvectors[:, 0:num_components]
+# Reconstruct image
+images = np.zeros((10, 28, 28))
+Sigma = np.diag(Sigma)
+components = np.append(components, data_mean_centered.shape[1])
+for img, sample in enumerate([1000, 2000, 3000]):
+    for i in range(len(components)):
+        X_tilda = U[:, :components[i]] @ Sigma[:components[i], :components[i]] @ V[:components[i], :]
+        X = X_tilda + np.mean(data, axis=0)
+        images[i, :, :] = X[sample, :].reshape(28, 28)
+    plot_reconstruction(images, 'Reconstruction: Sample ' + str(sample), 'Plots/Fig_1e_reconstruction_sample_' +
+                        str(sample))
 
-# plt.imshow(sorted_eigvectors[:, 0].reshape(28, 28), cmap="gray")
-# plt.show()
 
-
-
-####### Hre we goo
-# X, y = load_digits(return_X_y=True)
-# image = X[0]
-# image = image.reshape((8, 8))
-# plt.matshow(image, cmap = 'gray')
-# U, s, V = np.linalg.svd(image)
-# S = np.zeros((image.shape[0], image.shape[1]))
-# S[:image.shape[0], :image.shape[0]] = np.diag(s)
-# n_component = 2
-# S = S[:, :n_component]
-# VT = V.T[:n_component, :]
-# A = U.dot(S.dot(VT))
-# plt.matshow(A, cmap = 'gray')
-######
-
-# Compute SVD
-# Sigma = np.diag(Sigma)
-# num_compoonents = 10
-# # X = U[:, :num_compoonents] @ Sigma[:num_compoonents, :num_compoonents] @ V_T[:num_compoonents, :]
-
-# X += np.mean(data, axis=0)
-
-# last_example = np.reshape(X[-1, :], (28, 28))
-# plt.imshow(last_example, cmap="gray")
-# plt.show()
-
-# w,v = np.linalg.eig(data_mean.T @ data_mean)
-
-# Compute scores
-# scores = data_mean_centered @
-
-t=0
