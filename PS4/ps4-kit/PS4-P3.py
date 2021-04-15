@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import utils
 from scipy.stats import multivariate_normal
 from gmm import GaussianMixtureModel
+from sklearn.mixture import GaussianMixture
 
 
 def plot_contour_gaussian(ax, mean, covariance, eps=1e-2):
@@ -98,9 +99,6 @@ def plot_multiple_contour_plots(learned_models):
     return fig
 
 
-## Your code starts here
-print("hello world")
-
 '''
 For ith data point, if kth closter mean is closest to ith data point, then point is assighend to cluster ,  else 0
 break ties arbitrarily
@@ -118,13 +116,15 @@ E step
 '''
 
 ################################################
-# Problem 3a
+# Problem 3a_i
 ################################################
 print('-----------------------------------------------------------------------')
 print('Generate learning curve...')
+learned_models = []
 
 # Load testing data
 x_test = utils.load_data_from_txt_file("P3/X_test.txt")
+x_train = utils.load_data_from_txt_file("P3/X_test.txt")
 
 # No. features
 N, d = x_test.shape
@@ -143,7 +143,7 @@ covar[:] = np.eye(d)
 # Loop through all permutations of training data
 for frac in range(10, 110, 10):
     # Load training data from current permutation
-    x_train = utils.load_data_from_txt_file("P3/TrainSubsets/X_train_" + str(frac) + "%.txt")
+    x_train_perm = utils.load_data_from_txt_file("P3/TrainSubsets/X_train_" + str(frac) + "%.txt")
 
     # Load mean initializations
     mu = utils.load_data_from_txt_file("P3/MeanInitialization/Part_a/mu_" + str(frac) + "%.txt")
@@ -151,6 +151,28 @@ for frac in range(10, 110, 10):
     # Instantiate Gaussian mixture model object
     gmm_mdl = GaussianMixtureModel(K, mu, covar, mix_coeff)
 
-    # Lean gmm model on current permutation of training data
-    gmm_mdl.fit(x_train)
-    t=1
+    # Learn gmm model on current permutation of training data
+    gmm_mdl.fit(x_train_perm)
+
+    learned_models.append(gmm_mdl)
+
+    # fig, ax = plt.subplots()
+
+    # plot_gmm_model(ax, gmm_mdl, x_test, frac)
+
+    # plt.plot(x_train_perm[:, 0], x_train_perm[:, 1], 'bx')
+    # plt.axis('equal')
+    # plt.show()
+    # gmm = GaussianMixture(n_components=3)
+    # gmm.fit(x_train_perm)
+    # print(gmm.means_)
+    # print('\n')
+    # print(gmm.covariances_)
+    # print('-----------------------------------------------------------------------')
+    # print(gmm_mdl.mus)
+    # print('\n')
+    # print(gmm_mdl.covariances)
+
+fig = plot_multiple_contour_plots(learned_models)
+fig.savefig("Plots/4(a)(ii).png")
+print('-----------------------------------------------------------------------')

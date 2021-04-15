@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import multivariate_normal
 
+
 class GaussianMixtureModel():
     def __init__(self, K, init_mean, covariances, mixing_coeff=None):
         """ Gaussian Mixture Model
@@ -26,15 +27,15 @@ class GaussianMixtureModel():
         """
         # Some housekeeping things to make sure the dimensions agree
         (num_k, d) = init_mean.shape
-        assert(num_k == K)
-        assert(init_mean.shape == (K, d))
-        assert(covariances.shape == (K, d, d))
+        assert (num_k == K)
+        assert (init_mean.shape == (K, d))
+        assert (covariances.shape == (K, d, d))
 
         self.K = K
         # If mixing coefficient is not specified, initialize to uniform distribution
         if mixing_coeff is None:
-            mixing_coeff = np.ones((K,)) * 1./K
-        assert(mixing_coeff.shape == (K,))
+            mixing_coeff = np.ones((K,)) * 1. / K
+        assert (mixing_coeff.shape == (K,))
 
         self.mixing_coeff = np.copy(mixing_coeff)
         self.mus = np.copy(init_mean)
@@ -56,7 +57,7 @@ class GaussianMixtureModel():
 
         """
         (N, d) = X.shape
-        assert(d == self.d)
+        assert (d == self.d)
 
         self.llh = []
 
@@ -92,11 +93,12 @@ class GaussianMixtureModel():
         # Perform E-step
         for k in range(self.K):
             # Generate posterior distribution
-            p[:, k] = multivariate_normal.pdf(X, self.mus[k, :], self.covariances[k])
+            p[:, k] = self.mixing_coeff[k] * multivariate_normal.pdf(X, self.mus[k, :], self.covariances[k])
 
         # Normalize posterior distribution
         gamma_sum = np.sum(p, axis=1)[:, None]
         p /= gamma_sum
+        self.gamma = p
         return p
 
     def M_step(self, X, p):
@@ -145,5 +147,16 @@ class GaussianMixtureModel():
                 under the learned GMM
 
         """
-        # Your code goes here
+
+        N, d = X.shape
+        llh = np.zeros((N, self.K))
+
+        # Compute log-likelihood
+        for k in range(self.K):
+            dist = multivariate_normal(self.mus[k, :], self.covariances[k, :, :], allow_singular=True)
+            llh[:, k] = self.gamma[:, k] * (np.log(self.mixing_coeff[k] + 0.00001) + dist.logpdf(X) - np.log(self.gamma[:, k] + 0.000001))
+
+        # Normalize
+        llh = np.sum(llh) / N
+
         return llh
