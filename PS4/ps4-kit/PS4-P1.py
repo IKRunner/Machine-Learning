@@ -107,7 +107,6 @@ plt.xlabel('Principle Component 100')
 plt.ylabel('Principle Component 101')
 fig.savefig('Plots/Fig_1c_100_101_principal_component.png')
 
-
 ################################################
 # Problem 1d
 ################################################

@@ -86,7 +86,17 @@ class GaussianMixtureModel():
                      `0 <= j <= k-1`
 
         """
-        # Your code goes here
+        # Posterior distribution container
+        p = np.zeros((X.shape[0], self.K))
+
+        # Perform E-step
+        for k in range(self.K):
+            # Generate posterior distribution
+            p[:, k] = multivariate_normal.pdf(X, self.mus[k, :], self.covariances[k])
+
+        # Normalize posterior distribution
+        gamma_sum = np.sum(p, axis=1)[:, None]
+        p /= gamma_sum
         return p
 
     def M_step(self, X, p):
@@ -109,8 +119,21 @@ class GaussianMixtureModel():
             None
 
         """
-        # Your code goes here
-        return
+        # Compute total responsibility of k^{th} component for data
+        m_k = np.sum(p, axis=0)[:, None]
+
+        # Update mixing coefficients
+        self.mixing_coeff = np.mean(p, axis=0)
+
+        # Update mean vectors
+        self.mus = (p.T @ X) / m_k
+
+        # Update covariance matrix
+        tot = np.zeros((self.K, self.d, self.d))
+        for k in range(self.K):
+            self.covariances[k, :, :] = (1 / m_k[0]) * (m_k[0]) * (X - self.mus[k, :]).T @ (X - self.mus[k, :])
+
+        return None
 
     def compute_llh(self, X):
         """ Compute the log likelihood under the GMM

@@ -89,6 +89,7 @@ def plot_multiple_contour_plots(learned_models):
 
     axes = axes.flatten()
     percentage_data = np.arange(10, 101, 10)
+    X_test_all = utils.load_data_from_txt_file("P3/X_test.txt")
     for i, learned_model in enumerate(learned_models):
         plot_gmm_model(axes[i], learned_model, X_test_all, percentage_data[i])
 
@@ -99,3 +100,57 @@ def plot_multiple_contour_plots(learned_models):
 
 ## Your code starts here
 print("hello world")
+
+'''
+For ith data point, if kth closter mean is closest to ith data point, then point is assighend to cluster ,  else 0
+break ties arbitrarily
+initlize mean clusters
+update cluster assignments
+update cluster means
+repeat
+-gaussian mixture models provide soft clustering
+-\pi_k are mixing coefficients
+- Given target number oif Gaussian's k, find parameter estimates
+hideen variable is which gaussian points came from
+introduce latent variable which of k gaussians point came from
+initialize parameters to some estimate
+E step
+'''
+
+################################################
+# Problem 3a
+################################################
+print('-----------------------------------------------------------------------')
+print('Generate learning curve...')
+
+# Load testing data
+x_test = utils.load_data_from_txt_file("P3/X_test.txt")
+
+# No. features
+N, d = x_test.shape
+
+# Initialize target number of Gaussians
+K = 3
+
+# Initialize mixing coefficients
+mix_coeff = np.zeros((K, ))
+mix_coeff[:] = 1/K
+
+# Initialize covariance matrices
+covar = np.zeros((K, d, d))
+covar[:] = np.eye(d)
+
+# Loop through all permutations of training data
+for frac in range(10, 110, 10):
+    # Load training data from current permutation
+    x_train = utils.load_data_from_txt_file("P3/TrainSubsets/X_train_" + str(frac) + "%.txt")
+
+    # Load mean initializations
+    mu = utils.load_data_from_txt_file("P3/MeanInitialization/Part_a/mu_" + str(frac) + "%.txt")
+
+    # Instantiate Gaussian mixture model object
+    gmm_mdl = GaussianMixtureModel(K, mu, covar, mix_coeff)
+
+    # Lean gmm model on current permutation of training data
+    gmm_mdl.fit(x_train)
+    t=1
