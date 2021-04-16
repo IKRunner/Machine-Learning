@@ -98,7 +98,7 @@ class GaussianMixtureModel():
         # Normalize posterior distribution
         gamma_sum = np.sum(p, axis=1)[:, None]
         p /= gamma_sum
-        self.gamma = p
+
         return p
 
     def M_step(self, X, p):
@@ -122,18 +122,18 @@ class GaussianMixtureModel():
 
         """
         # Compute total responsibility of k^{th} component for data
-        m_k = np.sum(p, axis=0)[:, None]
+        m_k = np.sum(p, axis=0)
 
         # Update mixing coefficients
-        self.mixing_coeff = np.mean(p, axis=0)
+        self.mixing_coeff = m_k / X.shape[0]
 
         # Update mean vectors
-        self.mus = (p.T @ X) / m_k
+        self.mus = (p.T @ X) / m_k[..., None]
 
         # Update covariance matrix
-        tot = np.zeros((self.K, self.d, self.d))
         for k in range(self.K):
-            self.covariances[k, :, :] = (1 / m_k[0]) * (m_k[0]) * (X - self.mus[k, :]).T @ (X - self.mus[k, :])
+            self.covariances[k, :, :] = (m_k[k]) * (X - self.mus[k, :]).T @ (X - self.mus[k, :])
+            self.covariances[k, :, :] /= m_k[k]
 
         return None
 
@@ -147,16 +147,21 @@ class GaussianMixtureModel():
                 under the learned GMM
 
         """
-
         N, d = X.shape
-        llh = np.zeros((N, self.K))
+        k_terms = np.zeros((self.K, ))
+        m_terms = np.zeros((N, ))
 
         # Compute log-likelihood
-        for k in range(self.K):
-            dist = multivariate_normal(self.mus[k, :], self.covariances[k, :, :], allow_singular=True)
-            llh[:, k] = self.gamma[:, k] * (np.log(self.mixing_coeff[k] + 0.00001) + dist.logpdf(X) - np.log(self.gamma[:, k] + 0.000001))
+        for i in range(N):
+            for k in range(self.K):
+                exp_term = np.exp(-0.5 * (X[i] - self.mus[k]).T @
+                                  np.linalg.inv(self.covariances[k]) @ (X[i] - self.mus[k]))
+                num = self.mixing_coeff[k] * exp_term
+                den = ((2 * np.pi) ** (self.d / 2)) * np.sqrt(np.linalg.det(self.covariances[k]))
+                k_terms[k] = num / den
+            m_terms[i] = np.log(np.sum(k_terms))
 
         # Normalize
-        llh = np.sum(llh) / N
+        llh = np.sum(m_terms) / N
 
         return llh

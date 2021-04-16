@@ -153,25 +153,9 @@ for frac in range(10, 110, 10):
 
     # Learn gmm model on current permutation of training data
     gmm_mdl.fit(x_train_perm)
+    print(gmm_mdl.llh[-1])
 
     learned_models.append(gmm_mdl)
-
-    # fig, ax = plt.subplots()
-
-    # plot_gmm_model(ax, gmm_mdl, x_test, frac)
-
-    # plt.plot(x_train_perm[:, 0], x_train_perm[:, 1], 'bx')
-    # plt.axis('equal')
-    # plt.show()
-    # gmm = GaussianMixture(n_components=3)
-    # gmm.fit(x_train_perm)
-    # print(gmm.means_)
-    # print('\n')
-    # print(gmm.covariances_)
-    # print('-----------------------------------------------------------------------')
-    # print(gmm_mdl.mus)
-    # print('\n')
-    # print(gmm_mdl.covariances)
 
 fig = plot_multiple_contour_plots(learned_models)
 fig.savefig("Plots/4(a)(ii).png")
