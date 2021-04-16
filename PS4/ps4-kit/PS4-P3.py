@@ -140,6 +140,8 @@ mix_coeff[:] = 1/K
 covar = np.zeros((K, d, d))
 covar[:] = np.eye(d)
 
+x_test = utils.load_data_from_txt_file("P3/X_test.txt")
+
 # Loop through all permutations of training data
 for frac in range(10, 110, 10):
     # Load training data from current permutation
@@ -159,4 +161,7 @@ for frac in range(10, 110, 10):
 
 fig = plot_multiple_contour_plots(learned_models)
 fig.savefig("Plots/4(a)(ii).png")
+gmm_mdl = GaussianMixtureModel(K, mu, covar, mix_coeff)
+gmm_mdl.fit(x_train_perm)
+print("llh for test is: " + str(gmm_mdl.llh[-1]))
 print('-----------------------------------------------------------------------')

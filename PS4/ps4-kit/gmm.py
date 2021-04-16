@@ -121,19 +121,27 @@ class GaussianMixtureModel():
             None
 
         """
+        N = X.shape[0]
         # Compute total responsibility of k^{th} component for data
         m_k = np.sum(p, axis=0)
 
         # Update mixing coefficients
-        self.mixing_coeff = m_k / X.shape[0]
+        self.mixing_coeff = m_k / N
 
         # Update mean vectors
         self.mus = (p.T @ X) / m_k[..., None]
 
         # Update covariance matrix
-        for k in range(self.K):
-            self.covariances[k, :, :] = (m_k[k]) * (X - self.mus[k, :]).T @ (X - self.mus[k, :])
-            self.covariances[k, :, :] /= m_k[k]
+        cov = 0
+        for i in range(N):
+            cov += p[i][..., None, None] * (X[i] - self.mus).T @ (X[i] - self.mus)
+
+        self.covariances = cov / m_k[:, None, None]
+
+        # Update covariance matrix
+        # for k in range(self.K):
+        #     self.covariances[k, :, :] = (m_k[k]) * (X - self.mus[k, :]).T @ (X - self.mus[k, :])
+        #     self.covariances[k, :, :] /= m_k[k]
 
         return None
 
@@ -147,7 +155,7 @@ class GaussianMixtureModel():
                 under the learned GMM
 
         """
-        N, d = X.shape
+        N = X.shape[0]
         k_terms = np.zeros((self.K, ))
         m_terms = np.zeros((N, ))
 
