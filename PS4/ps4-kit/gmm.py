@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import multivariate_normal
-
+import matplotlib.pyplot as plt
 
 class GaussianMixtureModel():
     def __init__(self, K, init_mean, covariances, mixing_coeff=None):
@@ -38,6 +38,7 @@ class GaussianMixtureModel():
         assert (mixing_coeff.shape == (K,))
 
         self.mixing_coeff = np.copy(mixing_coeff)
+        self.initmean = np.copy(init_mean)
         self.mus = np.copy(init_mean)
         self.covariances = np.copy(covariances)
         self.d = d
@@ -69,6 +70,7 @@ class GaussianMixtureModel():
             # Early stopping
             self.llh.append(log_ll)
             if it > 0 and np.abs(log_ll - self.llh[-2]) < eps:
+                self.it = it
                 break
 
     def E_step(self, X):
@@ -122,27 +124,19 @@ class GaussianMixtureModel():
 
         """
         N = X.shape[0]
-        # Compute total responsibility of k^{th} component for data
-        m_k = np.sum(p, axis=0)
+        # fig, ax3 = plt.subplots()
+        # ax3.scatter(self.initmean[:, 0], self.initmean[:, 1], c='b')
+        # ax3.scatter(self.mus[:, 0], self.mus[:, 1], c="r")
+        # plt.title('test')
+        # ax3.set_xlabel('$\mu_1$')
+        # ax3.set_ylabel('$\mu_2$')
+        # plt.show()
 
-        # Update mixing coefficients
-        self.mixing_coeff = m_k / N
-
-        # Update mean vectors
-        self.mus = (p.T @ X) / m_k[..., None]
-
-        # Update covariance matrix
-        cov = 0
-        for i in range(N):
-            cov += p[i][..., None, None] * (X[i] - self.mus).T @ (X[i] - self.mus)
-
-        self.covariances = cov / m_k[:, None, None]
-
-        # Update covariance matrix
-        # for k in range(self.K):
-        #     self.covariances[k, :, :] = (m_k[k]) * (X - self.mus[k, :]).T @ (X - self.mus[k, :])
-        #     self.covariances[k, :, :] /= m_k[k]
-
+        for k in range(self.K):
+            m_k = np.sum(p[:, k])
+            self.mixing_coeff[k] = m_k / N
+            self.mus[k] = (p[:, k][None] @ X) / m_k
+            self.covariances[k, :, :] = (p[:, k] * (X - self.mus[k]).T @ (X - self.mus[k])) / m_k
         return None
 
     def compute_llh(self, X):
@@ -171,5 +165,4 @@ class GaussianMixtureModel():
 
         # Normalize
         llh = np.sum(m_terms) / N
-
         return llh

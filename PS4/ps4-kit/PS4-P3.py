@@ -120,7 +120,11 @@ E step
 ################################################
 print('-----------------------------------------------------------------------')
 print('Generate learning curve...')
+# Container for all models
 learned_models = []
+
+# Container to store log-likelihoods
+log_likelihoods = np.zeros([11, 2])
 
 # Load testing data
 x_test = utils.load_data_from_txt_file("P3/X_test.txt")
@@ -140,6 +144,7 @@ mix_coeff[:] = 1/K
 covar = np.zeros((K, d, d))
 covar[:] = np.eye(d)
 
+# Test data
 x_test = utils.load_data_from_txt_file("P3/X_test.txt")
 
 # Loop through all permutations of training data
@@ -155,13 +160,34 @@ for frac in range(10, 110, 10):
 
     # Learn gmm model on current permutation of training data
     gmm_mdl.fit(x_train_perm)
-    print(gmm_mdl.llh[-1])
+    # print("Iterations are: " + str(gmm_mdl.it))
 
+    # Store current model
     learned_models.append(gmm_mdl)
 
+    # Train and test log-likelihood
+    train_log = gmm_mdl.compute_llh(x_train_perm)
+    test_log = gmm_mdl.compute_llh(x_test)
+
+    print("For permutation " + str(frac) + ", iteration " + str(gmm_mdl.it) +
+          ", normalized training log-likelihood is: " + str(round(train_log, 4)) +
+          ", normalized test log-likelihood is: " + str(round(test_log, 4)))
+
+    # Save log-likelihoods
+    log_likelihoods[int(frac / 10), 0] = train_log
+    log_likelihoods[int(frac / 10), 1] = test_log
+
 fig = plot_multiple_contour_plots(learned_models)
-fig.savefig("Plots/4(a)(ii).png")
-gmm_mdl = GaussianMixtureModel(K, mu, covar, mix_coeff)
-gmm_mdl.fit(x_train_perm)
-print("llh for test is: " + str(gmm_mdl.llh[-1]))
+fig.savefig("Plots/3(a)(ii).png")
 print('-----------------------------------------------------------------------')
+
+# Plot Log-likelihoods
+fig, ax = plt.subplots()
+ax.plot(np.linspace(0, 100, num=11), log_likelihoods[:, 0], marker='o', c='b', label='Training Log-Likelihood')
+ax.plot(np.linspace(0, 100, num=11), log_likelihoods[:, 1], marker='o', c='r', label='Test Log-Likelihood')
+plt.title('GMM Learning Curve')
+plt.legend()
+ax.set_xlabel('No. Training Samples Used')
+ax.set_ylabel('Log-Likelihood')
+fig.savefig("Plots/3(a)(i).png")
+plt.show()
