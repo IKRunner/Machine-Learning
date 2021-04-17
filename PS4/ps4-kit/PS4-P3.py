@@ -7,7 +7,7 @@ import utils
 from scipy.stats import multivariate_normal
 from gmm import GaussianMixtureModel
 import winsound
-
+from tabulate import tabulate
 
 def plot_contour_gaussian(ax, mean, covariance, eps=1e-2):
     """ Plot the contour of a 2d Gaussian distribution with given mean and 
@@ -164,6 +164,10 @@ for frac, perm in enumerate(perms):
     train_log = gmm_mdl.compute_llh(x_train_perm)
     test_log = gmm_mdl.compute_llh(x_test)
 
+    # Save log-likelihood values for permutation 100
+    if perm == 100:
+        train_l = train_log
+        test_l = test_log
     print("For permutation " + str(perm) + ", iteration " + str(gmm_mdl.it) +
           ", normalized training log-likelihood is: " + str(round(train_log, 4)) +
           ", normalized test log-likelihood is: " + str(round(test_log, 4)))
@@ -171,6 +175,17 @@ for frac, perm in enumerate(perms):
     # Save log-likelihoods
     log_likelihoods[frac, 0] = train_log
     log_likelihoods[frac, 1] = test_log
+
+# Generate table
+rows, cols = (4, 2)
+result = [[0 for i in range(cols)] for j in range(rows)]
+names = ['K', 'Permutation', 'Normalized training log-likelihood', 'Normalized test log-likelihood']
+values = [str(K), str(100) + '%', str(round(train_l, 4)), str(round(test_l, 4))]
+for i, name in enumerate(names):
+    result[i] = [name, values[i]]
+
+# Save table to text file
+open('Plots/3(a)(ii).txt', 'w').write(tabulate(result, numalign="center"))
 
 print("Parameters of final model:")
 print("Means: " + str(learned_models[9].mus[0]) + str(learned_models[9].mus[1])
@@ -181,6 +196,8 @@ print("Mixing coefficients: " + str(learned_models[9].mixing_coeff[0]) +
       str(learned_models[9].mixing_coeff[1]) + str(learned_models[9].mixing_coeff[2]))
 fig = plot_multiple_contour_plots(learned_models)
 fig.savefig("Plots/3(a)(ii).png")
+
+np.savetxt('Plots/maximums.txt', learned_models[9].mus[0])
 print('-----------------------------------------------------------------------')
 
 # Plot Log-likelihoods
@@ -255,6 +272,13 @@ for idx_K, K in enumerate(gauss):
 # Optimal K value
 k_chosen = gauss[np.argmax(np.average(log_likelihoods_cross, axis=0))]
 print("Selected value of K is: " + str(k_chosen))
+
+# Generate table
+rows, cols = (1, 2)
+result = [[0 for i in range(cols)] for j in range(rows)]
+result[0] = ['Selected value of K:', str(k_chosen)]
+# Save table to text file
+open('Plots/3(b).txt', 'w').write(tabulate(result, numalign="center"))
 print('-----------------------------------------------------------------------')
 
 # Plot Log-likelihoods
@@ -268,7 +292,7 @@ plt.legend()
 ax.set_xlabel('No. Gaussians')
 ax.set_ylabel('Normalized Log-Likelihood')
 fig.savefig("Plots/3(b).png")
-plt.show()
+plt.show(block=False)
 
 duration = 3000  # milliseconds
 freq = 440  # Hz

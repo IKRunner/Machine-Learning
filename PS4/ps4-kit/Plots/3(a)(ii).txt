@@ -1,0 +1,6 @@
+----------------------------------  -------
+K                                   3
+Permutation                         100%
+Normalized training log-likelihood  -3.7002
+Normalized test log-likelihood      -3.709
+----------------------------------  -------

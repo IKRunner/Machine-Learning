@@ -99,8 +99,7 @@ class GaussianMixtureModel():
         # Perform E-step
         for i in range(N):
             for k in range(self.K):
-                p[i, k] = self.mixing_coeff[k] * multivariate_normal.pdf(X[i], self.mus[k], self.covariances[k],
-                                                                         allow_singular=False)
+                p[i, k] = self.mixing_coeff[k] * multivariate_normal.pdf(X[i], self.mus[k], self.covariances[k])
             p[i] = p[i] / np.sum(p[i])
 
         # Adjust ill-conditioned membership matrix
@@ -153,8 +152,7 @@ class GaussianMixtureModel():
         for i in range(N):
             inner = 0
             for k in range(self.K):
-                inner += self.mixing_coeff[k] * multivariate_normal.pdf(X[i], self.mus[k], self.covariances[k],
-                                                                        allow_singular=False)
+                inner += self.mixing_coeff[k] * multivariate_normal.pdf(X[i], self.mus[k], self.covariances[k])
             outer += np.log(inner)
 
         # Normalize

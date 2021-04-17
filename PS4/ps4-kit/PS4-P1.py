@@ -150,7 +150,7 @@ for i in range(len(RC)):
         accuracy[i+1] = [str(RC[i] * 100) + '%', components[i]]
 
 # Save table to text file
-open('Plots/Table_1d.txt', 'w').write(tabulate(accuracy))
+open('Plots/Table_1d.txt', 'w').write(tabulate(accuracy, numalign="center"))
 
 ################################################
 # Problem 1e
