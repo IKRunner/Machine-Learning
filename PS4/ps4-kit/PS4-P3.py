@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import utils
 from scipy.stats import multivariate_normal
 from gmm import GaussianMixtureModel
-import winsound
 from tabulate import tabulate
 
 
@@ -322,7 +321,3 @@ ax.set_xlabel('No. Gaussians')
 ax.set_ylabel('Normalized Log-Likelihood')
 fig.savefig("Plots/3(b).png")
 plt.show(block=False)
-
-duration = 3000  # milliseconds
-freq = 440  # Hz
-winsound.Beep(freq, duration)
