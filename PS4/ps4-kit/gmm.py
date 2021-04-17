@@ -1,6 +1,8 @@
 import numpy as np
+import scipy.linalg
 from scipy.stats import multivariate_normal
 import matplotlib.pyplot as plt
+
 
 class GaussianMixtureModel():
     def __init__(self, K, init_mean, covariances, mixing_coeff=None):
@@ -89,19 +91,20 @@ class GaussianMixtureModel():
                      `0 <= j <= k-1`
 
         """
+        N = X.shape[0]
+
         # Posterior distribution container
-        p = np.zeros((X.shape[0], self.K))
+        p = np.zeros((N, self.K))
 
         # Perform E-step
-        for k in range(self.K):
-            # Generate posterior distribution
-            p[:, k] = self.mixing_coeff[k] * multivariate_normal.pdf(X, self.mus[k, :], self.covariances[k])
+        for i in range(N):
+            for k in range(self.K):
+                p[i, k] = self.mixing_coeff[k] * multivariate_normal.pdf(X[i], self.mus[k], self.covariances[k],
+                                                                         allow_singular=False)
+            p[i] = p[i] / np.sum(p[i])
 
-        # Normalize posterior distribution
-        gamma_sum = np.sum(p, axis=1)[:, None]
-        p /= gamma_sum
-
-        return p
+        # Adjust ill-conditioned membership matrix
+        return p + 0.000000001
 
     def M_step(self, X, p):
         """  Do the maximization step of the EM algorithm
@@ -124,14 +127,8 @@ class GaussianMixtureModel():
 
         """
         N = X.shape[0]
-        # fig, ax3 = plt.subplots()
-        # ax3.scatter(self.initmean[:, 0], self.initmean[:, 1], c='b')
-        # ax3.scatter(self.mus[:, 0], self.mus[:, 1], c="r")
-        # plt.title('test')
-        # ax3.set_xlabel('$\mu_1$')
-        # ax3.set_ylabel('$\mu_2$')
-        # plt.show()
 
+        # Update parameters
         for k in range(self.K):
             m_k = np.sum(p[:, k])
             self.mixing_coeff[k] = m_k / N
@@ -150,19 +147,16 @@ class GaussianMixtureModel():
 
         """
         N = X.shape[0]
-        k_terms = np.zeros((self.K, ))
-        m_terms = np.zeros((N, ))
 
         # Compute log-likelihood
+        outer = 0
         for i in range(N):
+            inner = 0
             for k in range(self.K):
-                exp_term = np.exp(-0.5 * (X[i] - self.mus[k]).T @
-                                  np.linalg.inv(self.covariances[k]) @ (X[i] - self.mus[k]))
-                num = self.mixing_coeff[k] * exp_term
-                den = ((2 * np.pi) ** (self.d / 2)) * np.sqrt(np.linalg.det(self.covariances[k]))
-                k_terms[k] = num / den
-            m_terms[i] = np.log(np.sum(k_terms))
+                inner += self.mixing_coeff[k] * multivariate_normal.pdf(X[i], self.mus[k], self.covariances[k],
+                                                                        allow_singular=False)
+            outer += np.log(inner)
 
         # Normalize
-        llh = np.sum(m_terms) / N
+        llh = outer / N
         return llh
