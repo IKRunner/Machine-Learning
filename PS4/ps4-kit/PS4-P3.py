@@ -9,6 +9,7 @@ from gmm import GaussianMixtureModel
 import winsound
 from tabulate import tabulate
 
+
 def plot_contour_gaussian(ax, mean, covariance, eps=1e-2):
     """ Plot the contour of a 2d Gaussian distribution with given mean and 
     covariance matrix
@@ -28,15 +29,15 @@ def plot_contour_gaussian(ax, mean, covariance, eps=1e-2):
         None
 
     """
-    x1_range=np.linspace(-6, 8, 100)
-    x2_range=np.linspace(-10, 8, 100)
+    x1_range = np.linspace(-6, 8, 100)
+    x2_range = np.linspace(-10, 8, 100)
     X1, X2 = np.meshgrid(x1_range, x2_range, indexing='ij')
-    Z      = np.concatenate((X1.flatten()[:, np.newaxis], X2.flatten()[:, np.newaxis]), axis=1)
-    P      = multivariate_normal.pdf(Z, mean, covariance)
+    Z = np.concatenate((X1.flatten()[:, np.newaxis], X2.flatten()[:, np.newaxis]), axis=1)
+    P = multivariate_normal.pdf(Z, mean, covariance)
     P[P < eps] = 0
-    P      = P.reshape((len(x1_range), len(x2_range)))
+    P = P.reshape((len(x1_range), len(x2_range)))
     ax.contour(x1_range, x2_range, P.T, colors='black', alpha=0.2)
-    
+
 
 def plot_gmm_model(ax, learned_model, test_data, percent):
     """ Plot the learned GMM and its associated gaussian distribution
@@ -99,22 +100,6 @@ def plot_multiple_contour_plots(learned_models):
     return fig
 
 
-'''
-For ith data point, if kth closter mean is closest to ith data point, then point is assighend to cluster ,  else 0
-break ties arbitrarily
-initlize mean clusters
-update cluster assignments
-update cluster means
-repeat
--gaussian mixture models provide soft clustering
--\pi_k are mixing coefficients
-- Given target number oif Gaussian's k, find parameter estimates
-hideen variable is which gaussian points came from
-introduce latent variable which of k gaussians point came from
-initialize parameters to some estimate
-E step
-'''
-
 ################################################
 # Problem 3a
 ################################################
@@ -136,8 +121,8 @@ K = 3
 perms = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 # Initialize mixing coefficients
-mix_coeff = np.zeros((K, ))
-mix_coeff[:] = 1/K
+mix_coeff = np.zeros((K,))
+mix_coeff[:] = 1 / K
 
 # Initialize covariance matrices
 covar = np.zeros((K, d, d))
@@ -177,7 +162,11 @@ for frac, perm in enumerate(perms):
     log_likelihoods[frac, 0] = train_log
     log_likelihoods[frac, 1] = test_log
 
-# Generate table
+# Generate contour plot
+fig = plot_multiple_contour_plots(learned_models)
+fig.savefig("Plots/3(a)(ii).png")
+
+# Generate table of data for 100% permutation
 rows, cols = (5, 2)
 result = [[0 for i in range(cols)] for j in range(rows)]
 names = ['K', 'Permutation', 'Iterations', 'Normalized training log-likelihood', 'Normalized test log-likelihood']
@@ -188,17 +177,49 @@ for i, name in enumerate(names):
 # Save table to text file
 open('Plots/3(a)(ii).txt', 'w').write(tabulate(result, numalign="center"))
 
-print("Parameters of final model:")
-print("Means: " + str(learned_models[9].mus[0]) + str(learned_models[9].mus[1])
-      + str(learned_models[9].mus[2]))
-print("Covariances: " + str(learned_models[9].covariances[0]) +
-      str(learned_models[9].covariances[1]) + str(learned_models[9].covariances[2]))
-print("Mixing coefficients: " + str(learned_models[9].mixing_coeff[0]) +
-      str(learned_models[9].mixing_coeff[1]) + str(learned_models[9].mixing_coeff[2]))
-fig = plot_multiple_contour_plots(learned_models)
-fig.savefig("Plots/3(a)(ii).png")
+print("\nParameters of final model:")
+# Generate table of means
+rows, cols = (3, 2)
+result = [[0 for i in range(cols)] for j in range(rows)]
+names = ['Mean 1', 'Mean 2', 'Mean 3']
+values = [str(np.round(learned_models[9].mus[0], 4)),
+          str(np.round(learned_models[9].mus[1], 4)),
+          str(np.round(learned_models[9].mus[2], 4))]
+for i, name in enumerate(names):
+    result[i] = [name, values[i]]
 
-# np.savetxt('Plots/maximums.txt', learned_models[9].mus[0])
+print(tabulate(result, tablefmt="fancy_grid", numalign="decimal"))
+# Save means table to text file
+open('Plots/3(a)(ii)_means.txt', 'w').write(tabulate(result, stralign="right"))
+
+# Generate table of covariances
+rows, cols = (3, 2)
+result = [[0 for i in range(cols)] for j in range(rows)]
+names = ['Covariance 1', 'Covariance 2', 'Covariance 3']
+values = [str(np.round(learned_models[9].covariances[0], 4)),
+          str(np.round(learned_models[9].covariances[1], 4)),
+          str(np.round(learned_models[9].covariances[2], 4))]
+for i, name in enumerate(names):
+    result[i] = [name, values[i]]
+
+print(tabulate(result, tablefmt="fancy_grid"))
+# Save means table to text file
+open('Plots/3(a)(ii)_covariances.txt', 'w').write(tabulate(result, stralign="right"))
+
+
+# Generate table of mixing coefficients
+rows, cols = (3, 2)
+result = [[0 for i in range(cols)] for j in range(rows)]
+names = ['Mixing coefficient 1', 'Mixing coefficient 2', 'Mixing coefficient 3']
+values = [str(np.round(learned_models[9].mixing_coeff[0], 4)),
+          str(np.round(learned_models[9].mixing_coeff[1], 4)),
+          str(np.round(learned_models[9].mixing_coeff[2], 4))]
+for i, name in enumerate(names):
+    result[i] = [name, values[i]]
+
+print(tabulate(result, tablefmt="fancy_grid"))
+# Save means table to text file
+open('Plots/3(a)(ii)_mixing_coefficients.txt', 'w').write(tabulate(result, stralign="right"))
 print('-----------------------------------------------------------------------')
 
 # Plot Log-likelihoods
@@ -227,7 +248,7 @@ log_likelihoods_cross = np.zeros([5, len(gauss)])
 # Loop through all K values
 for idx_K, K in enumerate(gauss):
     # Initialize mixing coefficients
-    mix_coeff = np.zeros((K, ))
+    mix_coeff = np.zeros((K,))
     mix_coeff[:] = 1 / K
 
     # Initialize covariance matrices
@@ -253,7 +274,6 @@ for idx_K, K in enumerate(gauss):
 
     # Loop through all folds
     for idx_cross, fold in enumerate(gauss):
-        # print("yahyahyah K = " + str(K))
         # Load training/testing data from current fold
         x_train_fold = utils.load_data_from_txt_file("P3/CrossValidation/X_train_fold" + str(fold) + ".txt")
         x_test_fold = utils.load_data_from_txt_file("P3/CrossValidation/X_test_fold" + str(fold) + ".txt")

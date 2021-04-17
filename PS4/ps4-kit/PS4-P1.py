@@ -58,9 +58,10 @@ print('Generate last example...')
 data = genfromtxt('P1/X_train.csv', delimiter=',')
 last_example = np.reshape(data[-1, :], (28, 28))
 plt.imshow(last_example, cmap="gray")
+plt.title("Last Example")
 
 # Save image
-plt.savefig('Plots/Fig_1a_last_example.png')
+plt.savefig('Plots/1(a).png')
 
 ################################################
 # Problem 1b
@@ -75,7 +76,8 @@ U, Sigma, V = np.linalg.svd(data_mean_centered, full_matrices=False)
 # Save image
 for i in [0, 1, 2]:
     plt.imshow(V.T[:, i].reshape(28, 28), cmap="gray")
-    plt.savefig('Plots/Fig_1b_principal_component_' + str(i + 1) + '.png')
+    plt.title('Principal Component' + str(i + 1))
+    plt.savefig('Plots/1(b)_' + str(i + 1) + '.png')
 
 ################################################
 # Problem 1c
@@ -93,7 +95,8 @@ plt.plot(scores[:, 0], scores[:, 1], 'o', markersize=2)
 plt.title('Principle Components')
 plt.xlabel('Principle Component 1')
 plt.ylabel('Principle Component 2')
-fig.savefig('Plots/Fig_1c_top_2_principal_component.png')
+plt.title("Top 2 Principal Components")
+fig.savefig('Plots/1(c)_top_2_principal_component.png')
 
 # 100 and 101th Principle Component
 num_components = [99, 100]
@@ -105,7 +108,8 @@ plt.plot(scores[:, 0], scores[:, 1], 'o', markersize=2)
 plt.title('Principle Components')
 plt.xlabel('Principle Component 100')
 plt.ylabel('Principle Component 101')
-fig.savefig('Plots/Fig_1c_100_101_principal_component.png')
+plt.title("Principal Component 100, 101")
+fig.savefig('Plots/1(c)_100_101_principal_component.png')
 
 ################################################
 # Problem 1d
@@ -131,7 +135,8 @@ plt.ylim([0, 100])
 plt.title('Fractional Reconstruction Accuracy')
 plt.xlabel('No. Principle Components Used')
 plt.ylabel('Variance Explained (%)')
-fig.savefig('Plots/Fig_1d_fractional_reconstruction_accuracy.png')
+plt.title("Fractional Reconstruction Accuracy")
+fig.savefig('Plots/1(d).png')
 
 # Generate table
 RC = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -150,7 +155,7 @@ for i in range(len(RC)):
         accuracy[i + 1] = [str(RC[i] * 100) + '%', components[i]]
 
 # Save table to text file
-open('Plots/Table_1d.txt', 'w').write(tabulate(accuracy, numalign="center"))
+open('Plots/1(d).txt', 'w').write(tabulate(accuracy, numalign="center"))
 
 ################################################
 # Problem 1e
@@ -167,5 +172,5 @@ for img, sample in enumerate([1000, 2000, 3000]):
         X_tilda = U[:, :components[i]] @ Sigma[:components[i], :components[i]] @ V[:components[i], :]
         X = X_tilda + np.mean(data, axis=0)
         images[i, :, :] = X[sample, :].reshape(28, 28)
-    plot_reconstruction(images, 'Reconstruction: Sample ' + str(sample), 'Plots/Fig_1e_reconstruction_sample_' +
+    plot_reconstruction(images, 'Reconstruction: Sample ' + str(sample), 'Plots/1(e)_' +
                         str(sample))
