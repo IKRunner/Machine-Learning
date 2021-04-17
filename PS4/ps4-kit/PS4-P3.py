@@ -274,9 +274,16 @@ k_chosen = gauss[np.argmax(np.average(log_likelihoods_cross, axis=0))]
 print("Selected value of K is: " + str(k_chosen))
 
 # Generate table
-rows, cols = (1, 2)
+rows, cols = (4, 2)
 result = [[0 for i in range(cols)] for j in range(rows)]
-result[0] = ['Selected value of K:', str(k_chosen)]
+names = ['Selected value of K:', 'Average cross validation log-likelihood ',
+         'Normalized training log-likelihood', 'Normalized test log-likelihood']
+values = [str(k_chosen), str(round(np.max(np.average(log_likelihoods_cross, axis=0)), 4)),
+          str(round(log_likelihoods[np.argmax(np.average(log_likelihoods_cross, axis=0)), 0], 4)),
+          str(round(log_likelihoods[np.argmax(np.average(log_likelihoods_cross, axis=0)), 1], 4))]
+for i, name in enumerate(names):
+    result[i] = [name, values[i]]
+
 # Save table to text file
 open('Plots/3(b).txt', 'w').write(tabulate(result, numalign="center"))
 print('-----------------------------------------------------------------------')
