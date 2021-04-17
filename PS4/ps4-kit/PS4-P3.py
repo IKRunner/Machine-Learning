@@ -168,6 +168,7 @@ for frac, perm in enumerate(perms):
     if perm == 100:
         train_l = train_log
         test_l = test_log
+        it = gmm_mdl.it
     print("For permutation " + str(perm) + ", iteration " + str(gmm_mdl.it) +
           ", normalized training log-likelihood is: " + str(round(train_log, 4)) +
           ", normalized test log-likelihood is: " + str(round(test_log, 4)))
@@ -177,10 +178,10 @@ for frac, perm in enumerate(perms):
     log_likelihoods[frac, 1] = test_log
 
 # Generate table
-rows, cols = (4, 2)
+rows, cols = (5, 2)
 result = [[0 for i in range(cols)] for j in range(rows)]
-names = ['K', 'Permutation', 'Normalized training log-likelihood', 'Normalized test log-likelihood']
-values = [str(K), str(100) + '%', str(round(train_l, 4)), str(round(test_l, 4))]
+names = ['K', 'Permutation', 'Iterations', 'Normalized training log-likelihood', 'Normalized test log-likelihood']
+values = [str(K), str(100) + '%', str(it), str(round(train_l, 4)), str(round(test_l, 4))]
 for i, name in enumerate(names):
     result[i] = [name, values[i]]
 
@@ -197,7 +198,7 @@ print("Mixing coefficients: " + str(learned_models[9].mixing_coeff[0]) +
 fig = plot_multiple_contour_plots(learned_models)
 fig.savefig("Plots/3(a)(ii).png")
 
-np.savetxt('Plots/maximums.txt', learned_models[9].mus[0])
+# np.savetxt('Plots/maximums.txt', learned_models[9].mus[0])
 print('-----------------------------------------------------------------------')
 
 # Plot Log-likelihoods
@@ -296,6 +297,7 @@ ax.plot(gauss, np.average(log_likelihoods_cross, axis=0), marker='o', c='k',
         label='Cross-Validation Log-Likelihood')
 plt.title('GMM Learning Curve')
 plt.legend()
+plt.xticks(np.arange(1, 6))
 ax.set_xlabel('No. Gaussians')
 ax.set_ylabel('Normalized Log-Likelihood')
 fig.savefig("Plots/3(b).png")

@@ -30,7 +30,7 @@ def plot_reconstruction(images, title, filename):
         >>> images[9,:,:] = x100.reshape((28,28))
         >>> utils.plot_reconstruction(images, 'Image Title', 'filename.png')
     '''
-    assert images.shape == (10,28,28)
+    assert images.shape == (10, 28, 28)
     fig, (
         (ax0, ax1, ax2, ax3),
         (ax4, ax5, ax6, ax7),
@@ -42,7 +42,7 @@ def plot_reconstruction(images, title, filename):
         ax = axes[i]
         percent_name = f'{percents[i]}%' if i != 9 else 'Original'
         ax.set(title=percent_name)
-        axes[i].imshow(images[i,:,:], cmap='gray')
+        axes[i].imshow(images[i, :, :], cmap='gray')
     fig.suptitle(title)
     plt.tight_layout()
     plt.savefig(filename)
@@ -75,7 +75,7 @@ U, Sigma, V = np.linalg.svd(data_mean_centered, full_matrices=False)
 # Save image
 for i in [0, 1, 2]:
     plt.imshow(V.T[:, i].reshape(28, 28), cmap="gray")
-    plt.savefig('Plots/Fig_1b_principal_component_' + str(i+1) + '.png')
+    plt.savefig('Plots/Fig_1b_principal_component_' + str(i + 1) + '.png')
 
 ################################################
 # Problem 1c
@@ -120,7 +120,7 @@ sum_eigvals = np.sum(np.square(Sigma))
 components = np.arange(data_mean_centered.shape[1])
 frac_acc = np.zeros((data_mean_centered.shape[1]), )
 for i in components:
-    frac_acc[i] = np.sum(np.square(Sigma)[:i+1])
+    frac_acc[i] = np.sum(np.square(Sigma)[:i + 1])
 
 # Plot
 fig, _ = plt.subplots()
@@ -138,16 +138,16 @@ RC = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 rows, cols = (10, 2)
 accuracy = [[0 for i in range(cols)] for j in range(rows)]
 accuracy[0] = ['Reconstruction Accuracy', 'No. Principal Components Used']
-components = np.zeros((len(RC), ), dtype=int)
+components = np.zeros((len(RC),), dtype=int)
 for i in range(len(RC)):
     ele = np.where(np.logical_or((RC[i] * sum_eigvals) > frac_acc, (RC[i] * sum_eigvals) == frac_acc))
     if ele[0].size == 0:
         ele = 0
         components[i] = ele + 1
-        accuracy[i+1] = [str(RC[i] * 100) + '%', components[i]]
+        accuracy[i + 1] = [str(RC[i] * 100) + '%', components[i]]
     else:
         components[i] = ele[0][-1] + 1
-        accuracy[i+1] = [str(RC[i] * 100) + '%', components[i]]
+        accuracy[i + 1] = [str(RC[i] * 100) + '%', components[i]]
 
 # Save table to text file
 open('Plots/Table_1d.txt', 'w').write(tabulate(accuracy, numalign="center"))
@@ -169,5 +169,3 @@ for img, sample in enumerate([1000, 2000, 3000]):
         images[i, :, :] = X[sample, :].reshape(28, 28)
     plot_reconstruction(images, 'Reconstruction: Sample ' + str(sample), 'Plots/Fig_1e_reconstruction_sample_' +
                         str(sample))
-
-

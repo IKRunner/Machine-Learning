@@ -1,0 +1,6 @@
+---------------------------------------  -------
+Selected value of K:                        3
+Average cross validation log-likelihood  -3.7379
+Normalized training log-likelihood       -3.7002
+Normalized test log-likelihood           -3.7034
+---------------------------------------  -------
