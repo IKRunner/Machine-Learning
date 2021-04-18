@@ -165,60 +165,40 @@ for frac, perm in enumerate(perms):
 fig = plot_multiple_contour_plots(learned_models)
 fig.savefig("Plots/3(a)(ii).png")
 
+print("\nParameters of final model:")
 # Generate table of data for 100% permutation
 rows, cols = (5, 2)
-result = [[0 for i in range(cols)] for j in range(rows)]
 names = ['K', 'Permutation', 'Iterations', 'Normalized training log-likelihood', 'Normalized test log-likelihood']
 values = [str(K), str(100) + '%', str(it), str(round(train_l, 4)), str(round(test_l, 4))]
-for i, name in enumerate(names):
-    result[i] = [name, values[i]]
+filename = 'Plots/3(a)(ii).txt'
+utils.tabulate_data(rows, cols, names, values, "center", "num", filename, 'w')
 
-# Save table to text file
-open('Plots/3(a)(ii).txt', 'w').write(tabulate(result, numalign="center"))
-
-print("\nParameters of final model:")
 # Generate table of means
 rows, cols = (3, 2)
-result = [[0 for i in range(cols)] for j in range(rows)]
 names = ['Mean 1', 'Mean 2', 'Mean 3']
 values = [str(np.round(learned_models[9].mus[0], 4)),
           str(np.round(learned_models[9].mus[1], 4)),
           str(np.round(learned_models[9].mus[2], 4))]
-for i, name in enumerate(names):
-    result[i] = [name, values[i]]
-
-print(tabulate(result, tablefmt="fancy_grid", numalign="decimal"))
-# Save means table to text file
-open('Plots/3(a)(ii)_means.txt', 'w').write(tabulate(result, stralign="right"))
+filename = 'Plots/3(a)(ii)_means.txt'
+utils.tabulate_data(rows, cols, names, values, "right", "str", filename, 'w')
 
 # Generate table of covariances
 rows, cols = (3, 2)
-result = [[0 for i in range(cols)] for j in range(rows)]
 names = ['Covariance 1', 'Covariance 2', 'Covariance 3']
 values = [str(np.round(learned_models[9].covariances[0], 4)),
           str(np.round(learned_models[9].covariances[1], 4)),
           str(np.round(learned_models[9].covariances[2], 4))]
-for i, name in enumerate(names):
-    result[i] = [name, values[i]]
-
-print(tabulate(result, tablefmt="fancy_grid"))
-# Save means table to text file
-open('Plots/3(a)(ii)_covariances.txt', 'w').write(tabulate(result, stralign="right"))
-
+filename = 'Plots/3(a)(ii)_covariances.txt'
+utils.tabulate_data(rows, cols, names, values, "right", "str", filename, 'w')
 
 # Generate table of mixing coefficients
 rows, cols = (3, 2)
-result = [[0 for i in range(cols)] for j in range(rows)]
 names = ['Mixing coefficient 1', 'Mixing coefficient 2', 'Mixing coefficient 3']
 values = [str(np.round(learned_models[9].mixing_coeff[0], 4)),
           str(np.round(learned_models[9].mixing_coeff[1], 4)),
           str(np.round(learned_models[9].mixing_coeff[2], 4))]
-for i, name in enumerate(names):
-    result[i] = [name, values[i]]
-
-print(tabulate(result, tablefmt="fancy_grid"))
-# Save means table to text file
-open('Plots/3(a)(ii)_mixing_coefficients.txt', 'w').write(tabulate(result, stralign="right"))
+filename = 'Plots/3(a)(ii)_mixing_coefficients.txt'
+utils.tabulate_data(rows, cols, names, values, "right", "str", filename, 'w')
 print('-----------------------------------------------------------------------')
 
 # Plot Log-likelihoods
@@ -295,17 +275,13 @@ print("Selected value of K is: " + str(k_chosen))
 
 # Generate table
 rows, cols = (4, 2)
-result = [[0 for i in range(cols)] for j in range(rows)]
 names = ['Selected value of K:', 'Average cross validation log-likelihood ',
          'Normalized training log-likelihood', 'Normalized test log-likelihood']
 values = [str(k_chosen), str(round(np.max(np.average(log_likelihoods_cross, axis=0)), 4)),
           str(round(log_likelihoods[np.argmax(np.average(log_likelihoods_cross, axis=0)), 0], 4)),
           str(round(log_likelihoods[np.argmax(np.average(log_likelihoods_cross, axis=0)), 1], 4))]
-for i, name in enumerate(names):
-    result[i] = [name, values[i]]
-
-# Save table to text file
-open('Plots/3(b).txt', 'w').write(tabulate(result, numalign="center"))
+filename = 'Plots/3(b).txt'
+utils.tabulate_data(rows, cols, names, values, "center", "num", filename, 'w')
 print('-----------------------------------------------------------------------')
 
 # Plot Log-likelihoods

@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from tabulate import tabulate
 
 """
 TLDR:
@@ -352,3 +353,18 @@ def plot_reconstruction(images, title, filename):
     fig.suptitle(title)
     plt.tight_layout()
     plt.savefig(filename)
+
+
+def tabulate_data(rows, cols, names, values, alignment, align_type, filename, option):
+    result = [[0 for i in range(cols)] for j in range(rows)]
+    for i, name in enumerate(names):
+        result[i] = [name, values[i]]
+
+    print(tabulate(result, tablefmt="fancy_grid"))
+    if align_type == "num":
+        # Save table to text file
+        open(filename, option).write(tabulate(result, numalign=alignment))
+    if align_type == "str":
+        # Save table to text file
+        open(filename, option).write(tabulate(result, stralign=alignment))
+    return None
