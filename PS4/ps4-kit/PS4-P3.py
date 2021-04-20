@@ -127,6 +127,9 @@ mix_coeff[:] = 1 / K
 covar = np.zeros((K, d, d))
 covar[:] = np.eye(d)
 
+train_l = None
+test_l = None
+it = None
 # Loop through all permutations of training data
 for frac, perm in enumerate(perms):
     # Load training data from current permutation
